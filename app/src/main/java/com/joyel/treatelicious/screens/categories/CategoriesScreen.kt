@@ -23,6 +23,9 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.joyel.treatelicious.data.DataOrException
 import com.joyel.treatelicious.model.categories.Categories
+import com.joyel.treatelicious.navigation.BottomNavigationScreen
+import com.joyel.treatelicious.navigation.Screens
+import com.joyel.treatelicious.navigation.TreatNavigation
 import com.joyel.treatelicious.navigation.TreatScreens
 import com.joyel.treatelicious.screens.MainViewModel
 
@@ -34,7 +37,12 @@ fun CategoriesScreen(navController: NavController, mainViewModel: MainViewModel)
         value = mainViewModel.getAllCategories()
     }.value
 
-    Scaffold() {
+    val items = listOf(
+        Screens.Categories,
+        Screens.Explore,
+        Screens.MyRecipes
+    )
+    Scaffold(bottomBar = { BottomNavigationScreen(navController = navController, items = items) }) {
         Column(
             modifier = Modifier.padding(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 70.dp),
             verticalArrangement = Arrangement.Center,

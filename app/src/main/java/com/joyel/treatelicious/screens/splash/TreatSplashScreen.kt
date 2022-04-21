@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.rememberNavController
 import com.joyel.treatelicious.navigation.TreatScreens
 import kotlinx.coroutines.delay
@@ -38,7 +39,11 @@ fun TreatSplashScreen(navController: NavController) {
                OvershootInterpolator(8f).getInterpolation(it)
          }))
         delay(2000L)
-        navController.navigate(TreatScreens.ExploreScreen.name)
+        navController.navigate(TreatScreens.ExploreScreen.name+"/random") {
+            popUpTo(TreatScreens.SplashScreen.name) {
+                inclusive = true
+            }
+        }
     })
 
    Surface(modifier = Modifier

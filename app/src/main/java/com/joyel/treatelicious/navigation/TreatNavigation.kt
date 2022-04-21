@@ -66,7 +66,7 @@ fun BottomNavigationScreen(navController: NavController, items: List<Screens>) {
 @Composable
 fun TreatNavigation(navController: NavController) {
     val mainViewModel = hiltViewModel<MainViewModel>()
-    NavHost(navController = navController as NavHostController, startDestination = TreatScreens.CategoriesScreen.name) {
+    NavHost(navController = navController as NavHostController, startDestination = TreatScreens.SplashScreen.name) {
         composable(route = TreatScreens.SplashScreen.name) {
             TreatSplashScreen(navController = navController)
         }

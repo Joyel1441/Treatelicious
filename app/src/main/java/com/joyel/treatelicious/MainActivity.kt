@@ -29,16 +29,9 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Main() {
-    val items = listOf(
-        Screens.Categories,
-        Screens.Explore,
-        Screens.MyRecipes
-    )
     Surface(color = Color.White) {
         val navController = rememberNavController()
-        Scaffold(bottomBar = { BottomNavigationScreen(navController = navController, items = items)}) {
             TreatNavigation(navController = navController)
-        }
     }
 }
 

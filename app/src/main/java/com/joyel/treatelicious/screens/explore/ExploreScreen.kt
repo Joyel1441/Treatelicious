@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
@@ -25,86 +26,94 @@ import coil.compose.AsyncImage
 import com.joyel.treatelicious.data.DataOrException
 import com.joyel.treatelicious.model.meal.Meal
 import com.joyel.treatelicious.model.meal.SelectedCategory
+import com.joyel.treatelicious.navigation.BottomNavigationScreen
+import com.joyel.treatelicious.navigation.Screens
 import com.joyel.treatelicious.navigation.TreatScreens
 import com.joyel.treatelicious.screens.MainViewModel
 
 @Composable
 fun ExploreScreen(navController: NavController, category: String, mainViewModel: MainViewModel) {
+    val items = listOf(
+        Screens.Categories,
+        Screens.Explore,
+        Screens.MyRecipes
+    )
+   Scaffold(bottomBar = { BottomNavigationScreen(navController = navController, items = items) }) {
+       if (category == "random") {
+           val random_recipies_count = 10
+           val recipeList: MutableList<DataOrException<Meal, Boolean, Exception>> = mutableListOf()
+           for (i in 0..random_recipies_count - 1) {
+               val mealData = produceState<DataOrException<Meal, Boolean, Exception>>(
+                   initialValue =
+                   DataOrException(loading = true)
+               ) {
+                   value = mainViewModel.getRandomRecipe()
+               }.value
+               recipeList.add(mealData)
+           }
+           Column(modifier = Modifier.padding(bottom = 50.dp)) {
+               LazyColumn(
+                   modifier = Modifier
+                       .padding(10.dp)
+                       .fillMaxWidth()
+                       .fillMaxHeight(),
+                   verticalArrangement = Arrangement.Center,
+                   horizontalAlignment = Alignment.CenterHorizontally
+               ) {
+                   items(items = recipeList) { mealData ->
+                       if (mealData.loading == true) {
+                           CircularProgressIndicator()
+                       } else if (mealData.data != null)
+                           RecipeCardMeal(mealData = mealData.data) { mealId ->
+                               navController.navigate(TreatScreens.RecipeScreen.name + "/$mealId")
+                           }
+                   }
+               }
+           }
+       } else {
+           val mealData = produceState<DataOrException<SelectedCategory, Boolean, Exception>>(
+               initialValue =
+               DataOrException(loading = true)
+           ) {
+               value = mainViewModel.getRecipeByCategory(category)
+           }.value
+           if (mealData.data != null) {
+               Column(modifier = Modifier.padding(bottom = 50.dp)) {
+                   LazyColumn(
+                       modifier = Modifier
+                           .padding(10.dp)
+                           .fillMaxWidth()
+                           .fillMaxHeight(),
+                       verticalArrangement = Arrangement.Center,
+                       horizontalAlignment = Alignment.CenterHorizontally
+                   ) {
+                       items(mealData.data!!.meals) { mealData ->
+                           RecipeCardMealCategory(
+                               strMeal = mealData.strMeal,
+                               strMealThumb = mealData.strMealThumb,
+                               idMeal = mealData.idMeal
+                           ) { mealId ->
+                               navController.navigate(TreatScreens.RecipeScreen.name + "/$mealId") {
+                                   popUpTo(navController.graph.findStartDestination().id)
+                               }
+                           }
+                       }
+                   }
+               }
+           } else {
+               Column(
+                   modifier = Modifier
+                       .fillMaxWidth()
+                       .fillMaxHeight(),
+                   verticalArrangement = Arrangement.Center,
+                   horizontalAlignment = Alignment.CenterHorizontally
+               ) {
+                   CircularProgressIndicator()
+               }
+           }
+       }
+   }
 
-
-    if (category == "random") {
-        val random_recipies_count = 10
-        val recipeList: MutableList<DataOrException<Meal, Boolean, Exception>> = mutableListOf()
-        for (i in 0..random_recipies_count - 1) {
-            val mealData = produceState<DataOrException<Meal, Boolean, Exception>>(
-                initialValue =
-                DataOrException(loading = true)
-            ) {
-                value = mainViewModel.getRandomRecipe()
-            }.value
-            recipeList.add(mealData)
-        }
-        Column(modifier = Modifier.padding(bottom = 50.dp)) {
-            LazyColumn(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxWidth()
-                    .fillMaxHeight(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                items(items = recipeList) { mealData ->
-                    if (mealData.loading == true) {
-                        CircularProgressIndicator()
-                    } else if (mealData.data != null)
-                        RecipeCardMeal(mealData = mealData.data) { mealId ->
-                            navController.navigate(TreatScreens.RecipeScreen.name + "/$mealId")
-                        }
-                }
-            }
-        }
-    } else {
-        val mealData = produceState<DataOrException<SelectedCategory, Boolean, Exception>>(
-            initialValue =
-            DataOrException(loading = true)
-        ) {
-            value = mainViewModel.getRecipeByCategory(category)
-        }.value
-        if (mealData.data != null) {
-            Column(modifier = Modifier.padding(bottom = 50.dp)) {
-                LazyColumn(
-                    modifier = Modifier
-                        .padding(10.dp)
-                        .fillMaxWidth()
-                        .fillMaxHeight(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    items(mealData.data!!.meals) { mealData ->
-                        RecipeCardMealCategory(
-                            strMeal = mealData.strMeal,
-                            strMealThumb = mealData.strMealThumb,
-                            idMeal = mealData.idMeal
-                        ) { mealId ->
-                            navController.navigate(TreatScreens.RecipeScreen.name + "/$mealId") {
-                                popUpTo(navController.graph.findStartDestination().id)
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                CircularProgressIndicator()
-            }
-        }
-    }
 }
 
 @Composable
